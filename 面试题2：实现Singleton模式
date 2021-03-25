@@ -1,0 +1,46 @@
+思路：使用static关键字实现单例。static关键字具有如下特点：
+✳ 用作类成员变量时只有一份，所有对象共享，比如银行所有账户共享同一利率
+✳ 用作类成员函数时也只有一份，不包含this指针，所有对象共享
+✳ 用在函数内部定义局部变量时，该变量创建在静态区，其值在多次调用间保持不变
+
+为了避免用户以各种方式生成新的实例，我们应该把所有与构造对象有关的函数都写在private下面，其中包括普通构造函数、拷贝构造函数、拷贝赋值运算符。然后在public下写一个函数用于生成单例。为了保证多次调用该函数生成唯一的实例，应将其声明为static。
+
+
+class Singleton
+{
+public:
+	static Singleton& getInstance()
+	{
+		static Singleton onlyIns;
+		return onlyIns;
+	}
+private:
+	Singleton() {}
+	Singleton(const Singleton& rhs);
+	Singleton& operator=(const Singleton& rhs);
+};
+
+
+int main()
+{
+
+	Singleton& obj1 = Singleton::getInstance();
+	Singleton& obj2 = Singleton::getInstance();
+	Singleton& obj3 = Singleton::getInstance();
+	
+	cout << &obj1 << endl;  // 001A42E0
+	cout << &obj2 << endl;  // 001A42E0
+	cout << &obj3 << endl;  // 001A42E0
+	
+	return 0;
+}
+
+
+
+注意几点：
+1. 共有方法getInstance必须定义成静态函数，静态函数没有this指针
+2. getInstance的返回值必须定义成引用类型。函数中间定义的onlyIns是静态变量而非局部变量，因此返回引用没有问题。如果定义成普通类型，类外部调用getInstance在返回值时还是会调用拷贝构造函数，程序将报错。
+3. 上例中默认构造函数一定要定义，因为在getInstance方法内部定义单例onlyIns时要调用它，仅仅声明是不行的。
+
+此时在类外无法通过Singleton obj; obj i = obj k; 或者obj I = obj k; 等方式创建新的对象了，因为默认构造函数、拷贝构造函数和拷贝复制运动算符都是私有的。
+
