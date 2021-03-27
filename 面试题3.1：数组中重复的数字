@@ -1,0 +1,52 @@
+思路：由于长度为n，且所有数字的范围都在0 ~ n-1。因此如果数组没有重复的数字，那么从小到大排序后必定满足arr[i] == i, 0<=i<=n-1。
+于是我们可以从0开始到n-1遍历数组的各个位置，如果当前的arr[i] != i就令arr[i]与arr[arr[i]]交换位置，直到arr[i]==i为止，将当前位置i放上arr[i]，再继续处理下一个位置i+1。
+如果期间遇到arr[i]==arr[arr[i]]，则找到重复元素。否则不存在重复元素。
+
+
+void mySwap(int& a, int& b)
+{
+	int tmp = a;
+	a = b;
+	b = tmp;
+}
+
+int findDuplicate(int* arr, unsigned length)
+{
+	if (arr == nullptr || length <= 0)
+	{
+		cout << "Wrong input" << endl;
+		return -1;
+	}
+
+	for (int i = 0; i != length; ++i)
+	{
+		if (arr[i] < 0 || arr[i] > length - 1)
+		{
+			cout << "Wrong element." << endl;
+			return -1;
+		}
+	}
+
+
+	for (int i = 0; i != length; ++i)
+	{
+		while (arr[i] != i)
+		{
+			if (arr[i] == arr[arr[i]])
+				return arr[i];
+			mySwap(arr[i], arr[arr[i]]);
+		}
+	}
+	cout << "Ther is no repeated element." << endl;
+	return -1;
+}
+
+
+int main()
+{
+	int arr[]{ 2, 3, 1, 0, 2, 5, 3 };
+	unsigned len = sizeof(arr) / sizeof(arr[0]);
+	cout << findDuplicate(arr, len) << endl;
+	
+	return 0;
+}
