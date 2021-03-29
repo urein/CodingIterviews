@@ -1,0 +1,72 @@
+思路：
+如果我们从左往右进行，遇到空格进行替换，那后面的字符都要移动。时间复杂度为O(n^2)。
+因此我们可以从右往左进行。首先遍历字符串，统计字字符串长度len以及空格数目n，然后找到替换后字符串结尾的索引 len+2n
+只用两个游标，一个指向str[len]，一个指向str[len+2n]，逐次向前替换行进并替换。遇到空格时替换为%20。直到两个游标相遇终止操作。
+这种方式的时间复杂度只有O(n)。
+
+
+void ReplaceSpace(char* str, int assignedLen)
+{
+	if (str == nullptr || assignedLen <= 0)
+	{
+		cout << "Wrong Input" << endl;
+		return;
+	}
+
+	int nSpace = 0;
+	int strLen = 0;
+	for (int i = 0; str[i] != '\0'; ++i)
+	{
+		if (str[i] == ' ')
+			++nSpace;
+		++strLen;
+	}
+
+	int strIdx = strLen;
+	int cpyIdx = strLen + 2 * nSpace;
+	if (cpyIdx > assignedLen)
+	{
+		cout << "assigned length is not enough for replacement" << endl;
+		return;
+	}
+
+	while (cpyIdx > strIdx)
+	{
+		if (str[strIdx] == ' ')
+		{
+			str[cpyIdx--] = '0';
+			str[cpyIdx--] = '2';
+			str[cpyIdx--] = '%';
+		}
+		else
+			str[cpyIdx--] = str[strIdx];
+		
+		--strIdx;
+	}
+
+}
+
+
+
+int main()
+{
+	const int totalLen = 30;
+	char testStr[totalLen] = " Job  Hunting ";
+	ReplaceSpace(testStr, totalLen);
+
+	for (int i = 0; testStr[i] != '\0'; ++i)
+	{
+		cout << testStr[i];
+	}
+	cout << endl;
+
+	return 0;
+}
+
+
+测试用例：
+
+字符串包含空格：空格位于最前面，空格位于中间，空格位于最后面，连续空格
+字符串不包含空格
+特殊输入：字符串是空串，字符串只有一个空格
+错误输入：字符串是nullptr，分配空间不够容纳替换后的字符串
