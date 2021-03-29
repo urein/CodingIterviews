@@ -1,0 +1,56 @@
+思路1：从右上角开始寻找
+- 如果元素大于目标元素，则目标元素不可能在该列中，去掉一整列（列索引-1）；
+- 如果元素小于目标元素，则目标元素不可能在该行中，去掉一整行（行索引+1）；
+
+思路2：从左下角开始寻找
+- 如果元素大于目标元素，则目标元素不可能在该列中，去掉一整列（列索引+1）；
+- 如果元素小于目标元素，则目标元素不可能在该行中，去掉一整行（行索引-1）；
+
+但是不能从左上角或右下角开始寻找。因为可能性有多种：
+比如从左上角开始寻找，假如目标元素大于左上角元素，既可能出现在改行的右侧也可能出现在该列的下方，无法操作。
+
+
+
+bool isExist(int* matrix, int rows, int cols, int target)
+{
+	if (matrix == nullptr || rows <= 0 || cols <= 0)
+	{
+		cout << "Wrong Input" << endl;
+		return false;
+	}
+
+	int rowIdx = 0;
+	int colIdx = cols - 1;
+
+	while (rowIdx <= rows && colIdx >= 0)
+	{
+		int ruElem = matrix[rowIdx * rows + colIdx];
+
+		if (ruElem > target)
+			--colIdx;
+		else if (ruElem < target)
+			++rowIdx;
+		else
+			return true;
+	}
+	return false;
+}
+
+
+
+int main()
+{
+	int arr[] = { 1, 2, 8, 9, 2, 4, 9, 12, 4, 7, 10, 13, 6, 8, 11, 15 };
+	int nRows = 4;
+	int nCols = 4;
+	bool ret = isExist(arr, nRows, nCols, 8);
+	cout << ret << endl;
+
+	return 0;
+}
+
+
+测试数据：
+目标数字在矩阵中：最大值、最小值、中间值
+目标数字不在矩阵中：大于最大值、小于最小值、中间值
+无效输入：nullptr，行数/列数小于等于0
