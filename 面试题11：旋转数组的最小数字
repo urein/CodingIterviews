@@ -1,0 +1,70 @@
+思路：
+旋转数组可以分为两个部分，前半部分是旋转过来的子序列，后半部分是未选转的部分。显然前半部分的元素都要大于后半部分的元素。
+虽然整个序列并非有序，但它局部有序的特性也可以使用二分法寻找最小值。
+
+最一般的情况：6， 7， 1， 2， 3， 4， 5
+- 对于二分法，我们需要两个游标idx1和idx2，第一个指向首元素arr[idx1=0]=6，第二个指向尾元素arr[idx2=6]=5；
+- 二分查找：
+  - 计算中间索引mid为3，如果arr[mid]小于arr[0]，说明arr[0]并未处在前面的旋转子序列中，说明最小值在前半部分，此时令idx2=mid，折半查找前半部分
+  - 反之如果arr[mid]大于arr[0]，说明arr[0]处在前面的旋转子序列中，说明最小值在后半部分，此时令idx1=mid，折半查找前后部分
+  - 最终idx1和idx2会相差1，直接比较二者去较小值返回即可
+ 
+特殊情况：序列中右重复元素，比如 0， 1， 1， 1， 1， 1
+在旋转时同样有以下两种可能
+  - 1， 0， 1， 1， 1， 1   此时arr[mid]==arr[0]==1，最小值在前半部分
+  - 1， 1， 1， 1， 0， 1   此时arr[mid]==arr[0]==1，最小值在前后部分
+ 对于这种有重复元素的特殊情况，我们只能顺序遍历序列，遇到数值变小的那个元素便是最小值
+
+
+
+int getMin(int* arr, int length)
+{
+	if (arr == nullptr || length <= 0)
+	{
+		throw exception("Invalid input");
+	}
+
+	int idx1 = 0;
+	int idx2 = length - 1;
+	int mid = (idx1 + idx2) / 2;
+
+	while (idx2 - idx1 > 1)
+	{
+		if (arr[mid] == arr[idx1])
+		{
+			int ret = arr[0];
+			for (int i = 1; i != length; ++i)
+			{
+				if (arr[i] < ret)
+					ret = arr[i];
+			}
+			return ret;
+		}
+
+		if (arr[mid] < arr[idx1])
+		{
+			// arr[mid]属于有子序列，最小值在左侧
+			idx2 = mid;
+		}
+
+		else if (arr[mid] > arr[idx1])
+		{
+			// arr[mid]属于左子序列，最小值在右侧
+			idx1 = mid;
+		}
+
+		mid = (idx1 + idx2) / 2;
+	}
+  
+	return arr[idx1] < arr[idx2] ? arr[idx1] : arr[idx2];
+}
+
+
+int main()
+{
+	int arr[]{ 1, 0, 1, 1, 1 };
+	int len = sizeof(arr) / sizeof(arr[0]);
+	cout << getMin(arr, len) << endl;
+
+	return 0;
+}
