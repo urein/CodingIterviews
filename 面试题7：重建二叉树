@@ -1,0 +1,123 @@
+思路：
+- 给定了二叉树的前序遍历结果，其第一个元素一定是root。
+- 然后在中序遍历结果中寻找这个root：如果没找到则无法重建二叉树；如果找到则其左侧元素均属于该root的左子树，有侧元素均属于该root的右子树
+- 找到了中序遍历序列中的这些左子树节点和右子树节点，回去在前序遍历中定位这些节点（都是连续的），重复上面子树重建过程分别构建左子树和右子树（递归）
+
+代码：
+核心代码ConstructCore传入四个int指针，指向遍历序列中的元素，直接定位节点范围。然后在函数中根据遍历序列中定位到的节点数值，通过new创建树节点
+
+
+
+struct BTreeNode
+{
+	int m_Value;
+	BTreeNode* m_pLeft = nullptr;
+	BTreeNode* m_pRight = nullptr;
+};
+
+// 前序遍历，用于验证结果
+void PreOrderTraversal(BTreeNode* pRoot)
+{
+	if (pRoot == nullptr)
+		return;
+
+	cout << pRoot->m_Value << " ";
+	PreOrderTraversal(pRoot->m_pLeft);
+	PreOrderTraversal(pRoot->m_pRight);
+}
+
+// 中序遍历，用于验证结果
+void InOrderTraversal(BTreeNode* pRoot)
+{
+	if (pRoot == nullptr)
+		return;
+
+	InOrderTraversal(pRoot->m_pLeft);
+	cout << pRoot->m_Value << " ";
+	InOrderTraversal(pRoot->m_pRight);
+}
+
+// 后序遍历，用于验证结果
+void PostOrderTraversal(BTreeNode* pRoot)
+{
+	if (pRoot == nullptr)
+		return;
+
+	PostOrderTraversal(pRoot->m_pLeft);
+	PostOrderTraversal(pRoot->m_pRight);
+	cout << pRoot->m_Value << " ";
+}
+
+
+
+
+
+BTreeNode* ConstructCore(int*, int*, int*, int*);
+BTreeNode* ConstructTree(int* preorder, int* inorder, int length)
+{
+	if (preorder == nullptr || inorder == nullptr || length <= 0)
+		return nullptr;
+
+	return ConstructCore(preorder, preorder + length - 1, inorder, inorder + length - 1);
+}
+
+BTreeNode* ConstructCore(int* preLeft, int* preRight, int* inLeft, int* inRight)
+{
+	BTreeNode* root = new BTreeNode();
+	int rootVal = *preLeft;
+	root->m_Value = rootVal;
+
+	if (preLeft == preRight)
+	{
+		// 只剩下这一个节点且在前序和中序里的值相等
+		if (inLeft == inRight && *inLeft == *preLeft)
+			return root;
+		else
+			throw exception("Invalid Input");
+	}
+
+	// 在inorder里找root
+	int* inRoot = inLeft;
+	while (*inRoot != rootVal && inRoot != inRight)
+		++inRoot;
+	// 没找到
+	if (inRoot == inRight && *inRoot != rootVal)
+		throw exception("Invalid Input");
+
+	int subTreeLen = inRoot - inLeft;
+	
+	// 在左子树存在的前提下构建左子树
+	if (subTreeLen > 0)  
+		root->m_pLeft = ConstructCore(preLeft + 1, preLeft + subTreeLen, inLeft, inRoot - 1);
+
+	// 在右子树存在的前提下构建右子树
+	if (inRoot != inRight)
+		root->m_pRight = ConstructCore(preLeft + subTreeLen + 1, preRight, inRoot + 1, inRight);
+	
+	return root;
+
+}
+
+
+
+
+
+int main()
+{
+	int preorder[]{ 1, 2, 4, 7, 3, 5, 6, 8 };
+	int inorder[]{ 4, 7, 2, 1, 5, 3, 8, 6 };
+
+	int len = sizeof(preorder) / sizeof(preorder[0]);
+	BTreeNode* pRoot = ConstructTree(preorder, inorder, len);
+
+	PreOrderTraversal(pRoot);
+	cout << endl;
+
+	InOrderTraversal(pRoot);
+	cout << endl;
+	
+	PostOrderTraversal(pRoot);
+	cout << endl;
+
+	return 0;
+}
