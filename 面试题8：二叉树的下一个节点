@@ -1,0 +1,112 @@
+思路：有以下三种情况
+1. 如果节点不包含子节点，且是父节点的左子节点，下一个节点就是其父节点
+2. 如果节点有右子节点，下一个节点就是它右子树最深的左子节点
+3. 如果节点不是其父节点的左子节点，且不包含右子节点，则沿着父节点向上找，直到找到节点是它父节点的左子节点，父节点就是下一个节点。
+   这里注意，要包含中序遍历的最后一个节点的情况。
+
+下面代码直接将三种情况分开写，这种写法更直观。但书中的写法更简洁，因为对于1和3，都需要沿父节点找，如果当前节点就是父节点的左子节点，直接返回父节点。
+因此书中直接将1和3写在了一起。
+
+struct BTreeNode
+{
+	int m_Value;
+	BTreeNode* m_pLeft = nullptr;
+	BTreeNode* m_pRight = nullptr;
+	BTreeNode* m_Parent = nullptr;
+};
+
+BTreeNode* GetNextNode(BTreeNode* curNode)
+{
+	if (curNode == nullptr)
+		return nullptr;
+
+	// 如果节点不包含子节点，且是父节点的左子节点，下一个节点就是其父节点
+	if (curNode->m_pLeft == nullptr && curNode->m_pRight == nullptr &&
+		curNode == curNode->m_Parent->m_pLeft)
+	{
+		return curNode->m_Parent;
+	}
+
+	// 如果节点有右子节点，下一个节点就是它右子树最深的左子节点
+	else if (curNode->m_pRight != nullptr)
+	{
+		curNode = curNode->m_pRight;
+		while (curNode->m_pLeft != nullptr)
+		{
+			curNode = curNode->m_pLeft;
+		}
+		return curNode;
+	}
+
+	// 节点父节点的左子节点，且不包含右子节点，
+	// 沿着父节点向上找，直到找到节点是它父节点的左子节点，父节点就是下一个节点
+	else
+	{
+		while (curNode->m_Parent != nullptr && curNode != curNode->m_Parent->m_pLeft)
+			curNode = curNode->m_Parent;
+		
+		if (curNode->m_Parent == nullptr)
+			return nullptr;  // 中序遍历的最后一个节点
+		else
+			return curNode->m_Parent;
+	}
+}
+
+
+
+int main()
+{
+	BTreeNode nda;
+	//BTreeNode ndb;
+	BTreeNode ndc;
+	//BTreeNode ndd;
+	//BTreeNode nde;
+	//BTreeNode ndf;
+	BTreeNode ndg;
+	//BTreeNode ndh;
+	//BTreeNode ndi;
+
+	nda.m_Value = 1;
+	//ndb.m_Value = 2;
+	ndc.m_Value = 3;
+	//ndd.m_Value = 4;
+	//nde.m_Value = 5;
+	//ndf.m_Value = 6;
+	ndg.m_Value = 7;
+	//ndh.m_Value = 8;
+	//ndi.m_Value = 9;
+
+
+	//nda.m_pLeft = &ndb;
+	nda.m_pRight = &ndc;
+
+	//ndb.m_pLeft = &ndd;
+	//ndb.m_pRight = &nde;
+	//ndb.m_Parent = &nda;
+
+	//ndc.m_pLeft = &ndf;
+	ndc.m_pRight = &ndg;
+	ndc.m_Parent = &nda;
+
+	//ndd.m_Parent = &ndb;
+
+	//nde.m_pLeft = &ndh;
+	//nde.m_pRight = &ndi;
+	//nde.m_Parent = &ndb;
+
+	//ndf.m_Parent = &ndc;
+
+	ndg.m_Parent = &ndc;
+
+	//ndh.m_Parent = &nde;
+
+	//ndi.m_Parent = &nde;
+
+	BTreeNode* retNode = GetNextNode(&ndg);
+	if (retNode == nullptr)
+		cout << "This is the last node" << endl;
+	else
+		cout << retNode->m_Value << endl;
+
+	return 0;
+}
