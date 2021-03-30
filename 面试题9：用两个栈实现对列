@@ -1,0 +1,79 @@
+思路：
+首先向对列中添加几个元素1, 2, 3，元素被push到stack1中。
+此时想要让队首元素1出列，但stack1的top是3。因此需要将stack1中的元素依次pop并push到stack2中，直到stack1为空，stack的top就是1。此时stack2的元素自顶至下依次为2和3，符合出列顺序。
+此时再添加元素4和5到stack1中，然后不断出列直到队列为空。于是先不断pop stack2中的元素，为空后将stack1中剩余的元素转移到stack2中继续pop，直到stack2为空。
+
+过程总结如下：
+- 入队的元素永远添加到stack1中
+- 出队时，只要stack2中还有元素就pop stack2中的元素。如果没有则将stack1中所有的元素转移到stack2中再pop stack中的元素。
+
+
+template<typename T>
+class CQueue
+{
+public:
+	CQueue() {}
+	~CQueue() {}
+
+	void appendTail(const T& node);
+	T deleteHead();
+
+private:
+	stack<T> m_stack1;
+	stack<T> m_stack2;
+};
+
+template<typename T>
+inline void CQueue<T>::appendTail(const T& node)
+{
+	m_stack1.push(node);
+}
+
+template<typename T>
+inline T CQueue<T>::deleteHead()
+{	
+	// 如果m_stack2为空，把stack1中的元素转移进来
+	if (m_stack2.empty())
+	{
+		while (!m_stack1.empty())
+		{
+			T& elem = m_stack1.top();
+			m_stack1.pop();
+			m_stack2.push(elem);
+		}
+	}
+
+	// 如果stack2为空表示对列没有元素
+	if (m_stack2.empty())
+		throw exception("queue is empty!");
+	
+	// stack2此时必定不为空
+	T head = m_stack2.top();
+	m_stack2.pop();
+		
+	return head;
+}
+
+
+int main()
+{
+	CQueue<int> myQueue;
+
+	myQueue.appendTail(1);
+	myQueue.appendTail(2);
+	cout << myQueue.deleteHead() << endl;
+
+	myQueue.appendTail(3);
+	myQueue.appendTail(4);
+	cout << myQueue.deleteHead() << endl;
+
+	myQueue.appendTail(5);
+	cout << myQueue.deleteHead() << endl;
+	cout << myQueue.deleteHead() << endl;
+	cout << myQueue.deleteHead() << endl;
+
+	myQueue.appendTail(6);
+	cout << myQueue.deleteHead() << endl;
+
+	return 0;
+}
